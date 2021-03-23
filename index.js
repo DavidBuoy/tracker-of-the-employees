@@ -115,11 +115,15 @@ const addNewEmployee = () => {
       
     ])
     .then((answer) => {
+
+// ---------------- THIS IS USING THE EMPLOYEE TABLE
+
       // when finished prompting, insert a new item into the db with that info
+      // THIS IS THE CONNECTION TO THE db
       connection.query(
         'INSERT INTO employee SET ?',
         {
-          // Pretty sure this is the body stuff DAN was talking about on the new week.
+          // Pretty sure this is the body stuff DAN was talking about in week 13.
           first_name: answer.firstName,
           last_name: answer.lastName,
           employee_role: answer.role
@@ -128,20 +132,18 @@ const addNewEmployee = () => {
           if (err) throw err;
         }
       );
-
+// ---------------- THIS IS USING THE ROLE TABLE
       connection.query(
         'INSERT INTO role SET ?',
         {
-          // Pretty sure this is the body stuff DAN was talking about on the new week.
           title: answer.title,
           salary: answer.salary,
         },
         (err) => {
           if (err) throw err;
-          // User is being repromted to add a new user.
         }
       );
-
+// ---------------- THIS IS USING THE DEPARTMENT TABLE
       connection.query(
         'INSERT INTO department SET ?',
         {
@@ -163,7 +165,7 @@ const addNewEmployee = () => {
 
 
 const viewEmployee = () => {
-  connection.query('SELECT * FROM employee, role;', (error, results) => {
+  connection.query('SELECT * FROM employee, role, department;', (error, results) => {
     if (error) throw error;
 
     // Log all results of the SELECT statement

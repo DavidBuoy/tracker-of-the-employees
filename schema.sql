@@ -7,19 +7,19 @@ CREATE TABLE employee(
   id INT NOT NULL AUTO_INCREMENT,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR (100) NOT NULL,
-  employee_role VARCHAR (100) NOT NULL
+  employee_role VARCHAR (100) NOT NULL,
+  PRIMARY KEY(id)
 );
 
-CREATE TABLE employee-role(
+CREATE TABLE role(
   id INT NOT NULL AUTO_INCREMENT,
   title VARCHAR(100) NOT NULL,
-  salary DECIMAL MORE INFO HERE,
-  -- NEEDS MORE INFO ABOVE ON NUMBERS
-  employee_role VARCHAR (100) NOT NULL
+  salary DECIMAL (10) NULL,
+  PRIMARY KEY(id)
 );
 
 CREATE TABLE department(
   id INT NOT NULL AUTO_INCREMENT,
-  department-name VARCHAR(100) NOT NULL,
-  -- THIS SHOULD BE A LIST OF DEPARTMENTS 
+  department_name VARCHAR(100) NOT NULL,
+  PRIMARY KEY(id)
 );
