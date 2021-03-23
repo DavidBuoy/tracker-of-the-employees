@@ -1,5 +1,7 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
+const cTable = require('console.table');
+const chalk = require('chalk');
 
 // create the connection information for the sql database
 const connection = mysql.createConnection({
@@ -16,30 +18,67 @@ const connection = mysql.createConnection({
   database: 'tracker_db',
 });
 
-// function which prompts the user for what action they should take
-// const start = () => {
-//   inquirer
-//     .prompt({
-//       name: 'postOrBid',
-//       type: 'list',
-//       message: 'Would you like to [POST] an auction or [BID] on an auction?',
-//       choices: ['POST', 'BID', 'EXIT'],
-//     })
-//     .then((answer) => {
-//       // based on their answer, either call the bid or the post functions
-//       if (answer.postOrBid === 'POST') {
-//         postAuction();
-//       } else if (answer.postOrBid === 'BID') {
-//         bidAuction();
-//       } else {
-//         connection.end();
-//       }
-//     });
-// };
+// connect to the mysql server and sql database
+connection.connect((err) => {
+  if (err) throw err;
+  start();
+});
 
-// function to handle posting new items up for auction
+// function which prompts the user for what action they should take
 const start = () => {
-  // prompt for info about the item being put up for auction
+  inquirer
+    .prompt({
+      name: 'startingOptions',
+      type: 'rawlist',
+      message: 'WELCOME TO EMPLOYEE TRACKER!',
+      choices: ['Add New Employee', 'View Employees Info', 'Edit Employee Info', 'EXIT'],
+    })
+    .then((answer) => {
+
+  // ---------------------------------------------
+      // switch (answers.startingOptions) {
+      //   case 'Add New Employee':
+      //     addNewEmployee();
+      //     break;
+
+      //   case 'View Employees Info':
+      //     viewEmployee();
+      //     break;
+
+      // //   case 'Edit Employee Info':
+      // //     editEmployee();
+      // //     break;
+
+      //   case 'EXIT':
+      //     connection.end();
+      //     break;
+
+      //   default:
+      //     console.log(`Invalid action: ${answer.startingOptions}`);
+      //     break;
+      // }
+
+  // ---------------------------------------------
+
+      if (answer.startingOptions === 'Add New Employee') {
+        addNewEmployee();
+      } else if (answer.startingOptions === 'View Employees Info') {
+        viewEmployee();
+      } else if (answer.startingOptions === 'Edit Employee Info') {
+        editEmployee();
+      } else {
+        connection.end();
+      }
+
+  // ---------------------------------------------
+
+    });
+};
+// CRUD this is the "C" CREATING THE INFORMATION!
+
+// function to handle adding new employees to the DB
+const addNewEmployee = () => {
+  // Inquirer question promt for adding new employees
   inquirer
     .prompt([
       {
@@ -52,108 +91,105 @@ const start = () => {
         type: 'input',
         message: 'Enter Your Last Name',
       },
-      // {
-      //   name: 'category',
-      //   type: 'input',
-      //   message: 'What category would you like to place your auction in?',
-      // },
-      // {
-      //   name: 'startingBid',
-      //   type: 'input',
-      //   message: 'What would you like your starting bid to be?',
-      //   validate(value) {
-      //     if (isNaN(value) === false) {
-      //       return true;
-      //     }
-      //     return false;
-      //   },
-      // },
+      {
+        name: 'role',
+        type: 'list',
+        message: 'What is the role of the Employee?',
+        choices: ["Developer", "Designer", "Project Manager", "Total Bad Ass"]
+      },
+      {
+        name: 'title',
+        type: 'input',
+        message: 'What is the Title of the Employee?',
+      },
+      {
+        name: 'salary',
+        type: 'input',
+        message: 'What is the Employees Salary? NUMBERS ONLY',
+      },
+      {
+        name: 'department',
+        type: 'input',
+        message: 'What is the Department the employee works in?',
+      },
+      
     ])
     .then((answer) => {
       // when finished prompting, insert a new item into the db with that info
       connection.query(
         'INSERT INTO employee SET ?',
-        // QUESTION: What does the || 0 do?
         {
+          // Pretty sure this is the body stuff DAN was talking about on the new week.
           first_name: answer.firstName,
           last_name: answer.lastName,
-          // starting_bid: answer.startingBid || 0,
-          // highest_bid: answer.startingBid || 0,
+          employee_role: answer.role
         },
         (err) => {
           if (err) throw err;
-          console.log('NAME WAS ADDED!');
-          // re-prompt the user for if they want to bid or post
-          
+        }
+      );
+
+      connection.query(
+        'INSERT INTO role SET ?',
+        {
+          // Pretty sure this is the body stuff DAN was talking about on the new week.
+          title: answer.title,
+          salary: answer.salary,
+        },
+        (err) => {
+          if (err) throw err;
+          // User is being repromted to add a new user.
+        }
+      );
+
+      connection.query(
+        'INSERT INTO department SET ?',
+        {
+          // Pretty sure this is the body stuff DAN was talking about on the new week.
+          department_name: answer.department,
+        },
+        (err) => {
+          if (err) throw err;
+          console.log('EMPLOYEE WAS ADDED! What would you like to do now?');
+
+          // User is being repromted to add a new user.
+          start();
         }
       );
     });
 };
-// const bidAuction = () => {
-//   // query the database for all items being auctioned
-//   connection.query('SELECT * FROM auctions', (err, results) => {
-//     if (err) throw err;
-//     // once you have the items, prompt the user for which they'd like to bid on
-//     inquirer
-//       .prompt([
-//         {
-//           name: 'choice',
-//           type: 'rawlist',
-//           choices() {
-//             const choiceArray = [];
-//             results.forEach(({ item_name }) => {
-//               choiceArray.push(item_name);
-//             });
-//             return choiceArray;
-//           },
-//           message: 'What auction would you like to place a bid in?',
-//         },
-//         {
-//           name: 'bid',
-//           type: 'input',
-//           message: 'How much would you like to bid?',
-//         },
-//       ])
-//       .then((answer) => {
-//         // get the information of the chosen item
-//         let chosenItem;
-//         results.forEach((item) => {
-//           if (item.item_name === answer.choice) {
-//             chosenItem = item;
-//           }
-//         });
 
-//         // determine if bid was high enough
-//         if (chosenItem.highest_bid < parseInt(answer.bid)) {
-//           // bid was high enough, so update db, let the user know, and start over
-//           connection.query(
-//             'UPDATE auctions SET ? WHERE ?',
-//             [
-//               {
-//                 highest_bid: answer.bid,
-//               },
-//               {
-//                 id: chosenItem.id,
-//               },
-//             ],
-//             (error) => {
-//               if (error) throw err;
-//               console.log('Bid placed successfully!');
-//               start();
-//             }
-//           );
-//         } else {
-//           // bid wasn't high enough, so apologize and start over
-//           console.log('Your bid was too low. Try again...');
-//           start();
-//         }
-//       });
-//   });
-// };
+// CRUD the is the "R" Im viewing the information on the terminal.
 
-// connect to the mysql server and sql database
-connection.connect((err) => {
-  if (err) throw err;
-  // run the start function after the connection is made to prompt the user
-  start();
-});
+
+const viewEmployee = () => {
+  connection.query('SELECT * FROM employee, role;', (error, results) => {
+    if (error) throw error;
+
+    // Log all results of the SELECT statement
+    console.table(results);
+    // connection.end();
+    start();
+  });
+  
+};
+
+// const editEmployee = () => {
+// }
+
+
+
+
+
+
+
+// Remember that I will need to move around the calling of the functions to the correct areas then they are at now.
+// Look at the GreatBay activitie should help you line up what i need to do to add more fields. 
+// gonna need to do more research on methods. 
+// UNIT 11 will have info on how to add seeds. 
+// Probably gonna need some CRUD
+// CREATE - Need to add a person to the application with information on the employee.
+    // ill neeed input fields of first name, last name, role, department, 
+// READ - This needed a connection.query and inserted the place to draw from. so on mine i pulled from the whole DB table.
+// UPDATE - 
+// DELETE -  
