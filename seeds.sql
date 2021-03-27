@@ -1,2 +1,2 @@
--- INSERT INTO tracker_db (first_name,last_name,employee_roll)
--- VALUES ("Dan"), ("Wielder"),("Dev");
+INSERT INTO employee (first_name)
+VALUES ("Dan"), ("Wielder"),("Dev");

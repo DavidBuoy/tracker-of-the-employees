@@ -31,10 +31,10 @@ const start = () => {
       name: 'startingOptions',
       type: 'rawlist',
       message: 'WELCOME TO EMPLOYEE TRACKER!',
-      choices: ['Add New Employee', 'View Employees Info', 'Edit Employee Info', 'EXIT'],
+      choices: ['Add New Employee', 'View Employees Info', 'Add Role', 'Add Department', 'Edit Employee Info', 'EXIT'],
     })
     .then((answer) => {
-
+      // Couldn't get my switch case to work. :(
   // ---------------------------------------------
       // switch (answers.startingOptions) {
       //   case 'Add New Employee':
@@ -59,24 +59,30 @@ const start = () => {
       // }
 
   // ---------------------------------------------
-
+      // If else statement that switches through the first inquirer.
       if (answer.startingOptions === 'Add New Employee') {
         addNewEmployee();
-      } else if (answer.startingOptions === 'View Employees Info') {
-        viewEmployee();
+      } else if (answer.startingOptions === 'View Employees Info') {  viewEmployee();
+      } else if (answer.startingOptions === 'Add Role') {
+        addRole();
+      } else if (answer.startingOptions === 'Add Department') {
+        addDepartment();
+        
       } else if (answer.startingOptions === 'Edit Employee Info') {
         editEmployee();
+   
       } else {
         connection.end();
       }
 
   // ---------------------------------------------
-
     });
 };
 // CRUD this is the "C" CREATING THE INFORMATION!
 
-// function to handle adding new employees to the DB
+// Pretty sure that I need a JOIN or JOIN LEFT to get the tables to not print up a bunch of info.
+
+// function to handle adding new employees to the tracker_db
 const addNewEmployee = () => {
   // Inquirer question promt for adding new employees
   inquirer
@@ -92,15 +98,16 @@ const addNewEmployee = () => {
         message: 'Enter Your Last Name',
       },
       {
+        name: 'title',
+        type: 'list',
+        message: 'What is the Title of the Employee?',
+        choices: ["Junior", "Senior", "Intern"]
+      },
+      {
         name: 'role',
         type: 'list',
         message: 'What is the role of the Employee?',
-        choices: ["Developer", "Designer", "Project Manager", "Total Bad Ass"]
-      },
-      {
-        name: 'title',
-        type: 'input',
-        message: 'What is the Title of the Employee?',
+        choices: ["1 Developer", "2 Designer", "3 Manager", "4 Total Bad Ass", "5 TEST"]
       },
       {
         name: 'salary',
@@ -109,8 +116,9 @@ const addNewEmployee = () => {
       },
       {
         name: 'department',
-        type: 'input',
+        type: 'list',
         message: 'What is the Department the employee works in?',
+        choices:["Front End Web Development", "Front End Back End", "Designer", "Project Manager"]
       },
       
     ])
@@ -120,52 +128,49 @@ const addNewEmployee = () => {
 
       // when finished prompting, insert a new item into the db with that info
       // THIS IS THE CONNECTION TO THE db
+var roleID = answer.role.split(" ")[0]
+console.log(roleID);
+
+      
       connection.query(
         'INSERT INTO employee SET ?',
         {
           // Pretty sure this is the body stuff DAN was talking about in week 13.
           first_name: answer.firstName,
           last_name: answer.lastName,
-          employee_role: answer.role
+          employee_role: roleID,
         },
         (err) => {
           if (err) throw err;
         }
       );
 // ---------------- THIS IS USING THE ROLE TABLE
-      connection.query(
-        'INSERT INTO role SET ?',
-        {
-          title: answer.title,
-          salary: answer.salary,
-        },
-        (err) => {
-          if (err) throw err;
-        }
-      );
-// ---------------- THIS IS USING THE DEPARTMENT TABLE
-      connection.query(
-        'INSERT INTO department SET ?',
-        {
-          // Pretty sure this is the body stuff DAN was talking about on the new week.
-          department_name: answer.department,
-        },
-        (err) => {
-          if (err) throw err;
-          console.log('EMPLOYEE WAS ADDED! What would you like to do now?');
 
-          // User is being repromted to add a new user.
-          start();
-        }
-      );
+
+
+ 
+// ---------------- THIS IS USING THE DEPARTMENT TABLE
+      // connection.query(
+      //   'INSERT INTO department SET ?',
+      //   {
+      //     // Pretty sure this is the body stuff DAN was talking about on the new week.
+      //     department_name: answer.department,
+      //   },
+      //   (err) => {
+      //     if (err) throw err;
+      //     console.log('EMPLOYEE WAS ADDED! What would you like to do now?');
+
+      //     // User is being repromted to add a new user.
+      //     start();
+      //   }
+      // );
     });
 };
-
 // CRUD the is the "R" Im viewing the information on the terminal.
 
-
+// It prints all the info from the tracker_db, but it shows mulitpule inputs.
 const viewEmployee = () => {
-  connection.query('SELECT * FROM employee, role, department;', (error, results) => {
+  connection.query('SELECT * FROM employee INNER JOIN role ON employee.employee_role = role.id ', (error, results) => {
     if (error) throw error;
 
     // Log all results of the SELECT statement
@@ -173,8 +178,61 @@ const viewEmployee = () => {
     // connection.end();
     start();
   });
-  
 };
+
+
+const addRole = () => {
+  // Inquirer question promt for adding new employees
+  inquirer
+    .prompt([
+      
+      {
+        name: 'title',
+        type: 'list',
+        message: 'What is the Title of the Employee?',
+        choices: ["Junior", "Senior", "Intern"]
+      },
+   
+      {
+        name: 'salary',
+        type: 'input',
+        message: 'What is the Employees Salary? NUMBERS ONLY',
+      },
+      {
+        name: 'department',
+        type: 'list',
+        message: 'What is the Department the employee works in?',
+        choices: ["1 Front End Web Development", "2 Front End Back End", "3 Designer", "4 Project Manager"]
+      },
+
+    ])
+    .then((answer) => {
+
+      // ---------------- THIS IS USING THE EMPLOYEE TABLE
+
+      // when finished prompting, insert a new item into the db with that info
+      // THIS IS THE CONNECTION TO THE db
+      var departmentID = answer.department.split(" ")[0]
+      console.log(departmentID);
+
+
+      connection.query(
+        'INSERT INTO role SET ?',
+        {
+          // Pretty sure this is the body stuff DAN was talking about in week 13.
+          title: answer.title,
+          salary: answer.salary,
+          department_id: departmentID,
+        },
+        (err) => {
+          if (err) throw err;
+        }
+      );
+      // ---------------- THIS IS USING THE DEPARTMENT TABLE
+      
+    });
+};
+
 
 // const editEmployee = () => {
 // }
