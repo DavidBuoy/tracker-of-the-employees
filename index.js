@@ -129,7 +129,7 @@ const addNewEmployee = () => {
       // when finished prompting, insert a new item into the db with that info
       // THIS IS THE CONNECTION TO THE db
 var roleID = answer.role.split(" ")[0]
-console.log(roleID);
+
 
       
       connection.query(
@@ -142,6 +142,8 @@ console.log(roleID);
         },
         (err) => {
           if (err) throw err;
+          console.log("What Now?");
+          start();
         }
       );
 // ---------------- THIS IS USING THE ROLE TABLE
@@ -169,16 +171,7 @@ console.log(roleID);
 // CRUD the is the "R" Im viewing the information on the terminal.
 
 // It prints all the info from the tracker_db, but it shows mulitpule inputs.
-const viewEmployee = () => {
-  connection.query('SELECT * FROM employee INNER JOIN role ON employee.employee_role = role.id ', (error, results) => {
-    if (error) throw error;
 
-    // Log all results of the SELECT statement
-    console.table(results);
-    // connection.end();
-    start();
-  });
-};
 
 
 const addRole = () => {
@@ -208,12 +201,11 @@ const addRole = () => {
     ])
     .then((answer) => {
 
-      // ---------------- THIS IS USING THE EMPLOYEE TABLE
 
       // when finished prompting, insert a new item into the db with that info
       // THIS IS THE CONNECTION TO THE db
       var departmentID = answer.department.split(" ")[0]
-      console.log(departmentID);
+      
 
 
       connection.query(
@@ -226,13 +218,24 @@ const addRole = () => {
         },
         (err) => {
           if (err) throw err;
+          console.log("What now?");
+          start()
         }
       );
-      // ---------------- THIS IS USING THE DEPARTMENT TABLE
       
     });
 };
 
+const viewEmployee = () => {
+  connection.query('SELECT * FROM employee INNER JOIN role ON employee.employee_role = role.id ', (error, results) => {
+    if (error) throw error;
+
+    // Log all results of the SELECT statement
+    console.table(results);
+    // connection.end();
+    start();
+  });
+};
 
 // const editEmployee = () => {
 // }
